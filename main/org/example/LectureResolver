@@ -1,0 +1,30 @@
+package org.example;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class LectureResolver {
+    public static Lecture resolveLectures(Lecture remote, Lecture local) {
+        // Combine names from local and remote lectures
+        String resolvedName = local.name() + " / " + remote.name();
+
+        // Create a map of remote notes by ID
+        Map<Integer, Note> remoteNotesMap = remote.notes().stream()
+                .collect(Collectors.toMap(Note::id, note -> note));
+
+        // Resolve notes by combining local and remote notes
+        List<Note> resolvedNotes = local.notes().stream()
+                .map(localNote -> remoteNotesMap.containsKey(localNote.id())
+                        ? new Note(localNote.id(), remoteNotesMap.get(localNote.id()).timestamp(),
+                        localNote.text() + " / " + remoteNotesMap.remove(localNote.id()).text())
+                        : localNote)
+                .collect(Collectors.toList());
+
+        // Add remaining remote notes
+        resolvedNotes.addAll(remoteNotesMap.values());
+
+        // Return the resolved lecture
+        return new Lecture(resolvedName, resolvedNotes);
+    }
+}

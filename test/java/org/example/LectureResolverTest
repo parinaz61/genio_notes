@@ -1,0 +1,43 @@
+package org.example;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class LectureResolverTest {
+    @Test
+    public void testResolveLectures() {
+        Lecture local = new Lecture("Lecture1", Arrays.asList(
+                new Note(1, 3200, "A"),
+                new Note(2, 5600, "C")
+        ));
+
+        Lecture remote = new Lecture("Lecture2", Collections.singletonList(
+                new Note(1, 2400, "B")
+        ));
+
+        Lecture resolved = LectureResolver.resolveLectures(remote, local);
+
+        assertEquals("Lecture1 / Lecture2", resolved.name());
+        assertEquals(2, resolved.notes().size());
+
+        Note resolvedNote1 = resolved.notes().stream()
+                .filter(note -> note.id() == 1)
+                .findFirst()
+                .orElse(null);
+        assertEquals(1, resolvedNote1.id());
+        assertEquals(2400, resolvedNote1.timestamp());
+        assertEquals("A / B", resolvedNote1.text());
+
+        Note resolvedNote2 = resolved.notes().stream()
+                .filter(note -> note.id() == 2)
+                .findFirst()
+                .orElse(null);
+        assertEquals(2, resolvedNote2.id());
+        assertEquals(5600, resolvedNote2.timestamp());
+        assertEquals("C", resolvedNote2.text());
+    }
+}
